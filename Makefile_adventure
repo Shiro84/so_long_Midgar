@@ -1,0 +1,111 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile_adventure                                 :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: matomas <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/11/20 16:05:43 by matomas           #+#    #+#              #
+#    Updated: 2024/11/20 16:05:58 by matomas          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+# **************************************************************************** #
+#                                                                              #
+#                               Makefile Fantasía                              #
+#                                                                              #
+# **************************************************************************** #
+
+NAME = so_long
+
+# Directorios
+SRCDIR = src
+OBJDIR = objects
+HEADERDIR = include
+LIBDIR = lib
+
+# Librerías
+LIBFT = $(LIBDIR)/libft/libft.a
+GNL = $(LIBDIR)/gnl/get_next_line.a
+MLX = $(LIBDIR)/mlx/libmlx.a
+
+# Headers
+HEADERS = $(HEADERDIR)/so_long.h \
+          $(LIBDIR)/gnl/get_next_line.h \
+          $(LIBDIR)/libft/libft.h \
+          $(LIBDIR)/mlx/mlx.h
+
+# Archivos fuente
+SOURCES = main.c \
+          map/map_load.c \
+          map/map_parse.c \
+          map/map_draw.c \
+          player/player_init.c \
+          player/player_move.c \
+          enemies/enemies_init.c \
+          enemies/enemies_move.c \
+          game/game_loop.c \
+          game/game_exit.c
+
+OBJECTS = $(addprefix $(OBJDIR)/, $(SOURCES:.c=.o))
+
+# Compilación
+CC = gcc
+CFLAGS = -Wall -Werror -Wextra -g -I$(HEADERDIR) -I$(LIBDIR)/libft -I$(LIBDIR)/gnl -I$(LIBDIR)/mlx
+MLX_FLAGS = -L$(LIBDIR)/mlx -lmlx -framework OpenGL -framework Appkit
+
+# Colores mágicos
+DEF_COLOR = \033[0;39m
+RED = \033[0;91m
+GREEN = \033[0;92m
+YELLOW = \033[0;93m
+BLUE = \033[0;94m
+CYAN = \033[0;96m
+PURPLE = \033[0;95m
+
+# Reglas
+all: $(LIBFT) $(GNL) $(MLX) $(NAME)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS)
+	@mkdir -p $(OBJDIR) $(OBJDIR)/map $(OBJDIR)/player $(OBJDIR)/enemies $(OBJDIR)/game
+	@echo "$(PURPLE)Cargando mundo...$(DEF_COLOR) $(BLUE)$<$(DEF_COLOR)"
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(NAME): $(OBJECTS)
+	@echo "$(CYAN)Preparando aventura...$(DEF_COLOR)"
+	@$(CC) $(CFLAGS) $(MLX_FLAGS) $(OBJECTS) $(LIBFT) $(GNL) -o $(NAME)
+	@echo "$(GREEN)El mundo está listo para la exploración: $(NAME)$(DEF_COLOR)"
+
+$(LIBFT):
+	@echo "$(YELLOW)Reuniendo sabiduría ancestral (libft)...$(DEF_COLOR)"
+	@make -C $(LIBDIR)/libft
+	@echo "$(CYAN)Librería libft completa.$(DEF_COLOR)"
+
+$(GNL):
+	@echo "$(YELLOW)Descifrando pergaminos olvidados (get_next_line)...$(DEF_COLOR)"
+	@make -C $(LIBDIR)/gnl
+	@echo "$(CYAN)Librería get_next_line completa.$(DEF_COLOR)"
+
+$(MLX):
+	@echo "$(YELLOW)Forjando herramientas mágicas (MiniLibX)...$(DEF_COLOR)"
+	@make -C $(LIBDIR)/mlx
+	@echo "$(CYAN)MiniLibX lista para el viaje.$(DEF_COLOR)"
+
+clean:
+	@echo "$(RED)Eliminando escombros del mundo...$(DEF_COLOR)"
+	@make clean -C $(LIBDIR)/libft
+	@make clean -C $(LIBDIR)/gnl
+	@make clean -C $(LIBDIR)/mlx
+	@rm -rf $(OBJDIR)
+	@echo "$(GREEN)El mundo está limpio.$(DEF_COLOR)"
+
+fclean: clean
+	@echo "$(RED)Destruyendo reliquias antiguas (ejecutable)...$(DEF_COLOR)"
+	@make fclean -C $(LIBDIR)/libft
+	@make fclean -C $(LIBDIR)/gnl
+	@rm -f $(NAME)
+	@echo "$(GREEN)El ejecutable ha sido eliminado.$(DEF_COLOR)"
+
+re: fclean all
+
+.PHONY: all clean fclean re
